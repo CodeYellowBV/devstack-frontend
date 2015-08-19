@@ -1,0 +1,18 @@
+<p>
+    You are successfully logged in as <%-username%>!
+</p>
+
+<% if (last_login) { %>
+<p>
+    Your last login was at <em><%-last_login.format('YYYY-MM-DD HH:MM')%></em>.
+</p>
+<% } %>
+
+<h3>Navigation options</h3>
+<ul>
+    <li><a href="#user/overview">User overview</a></li>
+</ul>
+
+<p>
+    <a href="#logout">Logout</a>.
+</p>

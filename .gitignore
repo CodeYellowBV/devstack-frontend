@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.env
+
+# OS-specific files should NOT be included here!
+# Include them in a global .gitignore file.
