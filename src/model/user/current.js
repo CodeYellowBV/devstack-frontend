@@ -1,11 +1,28 @@
+/**
+* A singleton model which constantly represents the currently
+* logged-in user.
+*/
 import MUser from 'model/user';
 
 class MUserCurrent extends MUser {
+    fetch(options) {
+        options = $.extend({
+            url: 'api/user_current',
+        }, options || {});
+
+        return MUser.prototype.fetch.call(this, options);
+    }
     isLoggedIn() {
         return this.get('id') !== null;
     }
     /**
-     * Login user
+     * Set a new current user that is logged in.
+     */
+    setNewModel(payload) {
+        return this.clear().set(this.parse(payload));
+    }
+    /**
+     * Login user.
      *
      * @param {Object} data Login data
      * @param {Object} params Params for ajax call.
@@ -17,60 +34,58 @@ class MUserCurrent extends MUser {
         // Merge with defaults.
         params = $.extend(true, {
             url: this.urlRoot + '/login',
+            headers: {
+                Accept: 'application/json',
+            },
             dataType: 'json',
-            type: 'post',
             data,
+            type: 'post',
         }, params || {});
 
         xhr = $.ajax(params);
 
-        xhr.done((payload, textStatus, jqXHR) => {
-            // Set user data.
-            this.clear().set(this.parse(payload));
+        xhr.done((payload) => {
+            if (!payload) {
+                console.error('Did not receive user object, check contact!');
+                return;
+            }
 
-            // Trigger success event.
-            vent.trigger('after:user:login:success', payload, textStatus, jqXHR);
+            this.setNewModel(payload);
+
+            vent.trigger('after:user:login:success', payload);
         });
 
-        xhr.always(() => {
-            vent.trigger('after:user:login');
-        });
-
-        xhr.fail((jqXHR, textStatus, errorThrown) => {
-            vent.trigger('after:user:login:fail', jqXHR, textStatus, errorThrown);
+        xhr.fail(() => {
+            vent.trigger('after:user:login:fail');
         });
 
         return xhr;
     }
     /**
-     * Logout user (might switch back to another user if this was a masqueraded login)
+     * Logout user (might switch back to another user if this was a masqueraded login).
      *
      * @return {jqXHR} jqXHR
      */
     logout() {
+        let xhr = null;
         const params = {
             url: this.urlRoot + '/logout',
             dataType: 'json',
-            type: 'get',
+            type: 'post',
         };
-        let xhr = null;
 
         xhr = $.ajax(params);
 
-        xhr.done((data, textStatus, jqXHR) => {
-            // Set person data.
+        xhr.done((data) => {
+            // Clear user data.
             this.clear().set(this.defaults());
 
             // Trigger success event.
-            vent.trigger('after:user:logout:success', data, textStatus, jqXHR);
+            vent.trigger('after:user:logout:success', data);
         });
 
-        xhr.always(() => {
-            vent.trigger('after:user:logout');
-        });
-
-        xhr.fail((jqXHR, textStatus, errorThrown) => {
-            vent.trigger('after:user:logout:fail', jqXHR, textStatus, errorThrown);
+        xhr.fail(() => {
+            vent.trigger('after:user:logout:fail');
         });
 
         return xhr;
@@ -81,19 +96,27 @@ class MUserCurrent extends MUser {
      * @return {jqXHR} jqXHR
      */
     masquerade(model) {
+        let xhr = null;
         const params = {
             url: this.urlRoot + '/' + model.get('id') + '/masquerade',
             dataType: 'json',
             type: 'get',
         };
-        let xhr = null;
 
         xhr = $.ajax(params);
 
-        xhr.done(() => {
-            // TODO [Kees]: Fix properly.
+        xhr.done((data, textStatus, jqXHR) => {
             Backbone.history.navigate('');
             document.location.reload();
+
+            // Trigger success event.
+            vent.trigger('after:user:masquerade:success', data, textStatus, jqXHR);
+        });
+
+        xhr.always(() => vent.trigger('after:user:masquerade'));
+
+        xhr.fail((jqXHR, textStatus, errorThrown) => {
+            vent.trigger('after:user:masquerade:fail', jqXHR, textStatus, errorThrown);
         });
 
         return xhr;

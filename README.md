@@ -5,6 +5,8 @@ Javascript can be written in ES6 and is transpiled to ES5 using [Babel](https://
 
 Styles are preprocessed by [Sass](http://sass-lang.com/) and then by [Postcss](https://github.com/postcss/postcss).
 
+This frontend needs a backend to work. An example backend will be made at some time in the not so distant future.
+
 ## Usage
 Copy `.env.example` to `.env` and change it to your likings. If you want a custom location for the dotenv file, use `CY_ENV_FILE=/home/obama/.env`.
 
@@ -12,4 +14,4 @@ Run `npm install` and wait for an eternity. Start development by running `npm st
 
 Use `npm test` to run the unit tests.
 
-Use `npm run build` to generate a build in the `dist/` directory. Cleanup after with `npm run clean`.
+Use `npm run build` to generate a build in the `dist/` directory. Optionally cleanup after with `npm run clean`.

@@ -1,16 +1,11 @@
 import path from 'path';
 import webpack from 'webpack';
-import _ from 'lodash';
 import HtmlWebPackPlugin from 'html-webpack-plugin';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import autoprefixer from 'autoprefixer-core';
 import './scripts/load-env';
-import pkg from './package.json';
 
-const IS_DEVELOPMENT = process.env.CY_ENVIRONMENT === 'development';
-
-let devtool = '#source-map';
-let debug = false;
+const IS_DEBUG = !!process.env.CY_DEBUG;
 
 // Plugins that are used for all environments.
 const plugins = [
@@ -26,37 +21,24 @@ const plugins = [
     }),
     // Prevent including all locales of moment.
     new webpack.IgnorePlugin(/^\.\/locale$/, [/moment$/]),
-    new webpack.DefinePlugin({
-        CY_CONFIG: JSON.stringify({
-            domain: _.trimLeft(process.env.CY_SESSION_DOMAIN, '.'),
-            environment: process.env.CY_ENVIRONMENT,
-            is_demo: !!process.env.CY_DEMO,
-            version: pkg.version,
-            node: {
-                base_url: process.env.CY_NODE_CLIENT_BASE_URL,
-                socketOptions: {
-                    path: process.env.CY_NODE_CLIENT_SOCKET_PATH,
-                },
-            },
-        }),
-    }),
     // Main static file.
     new HtmlWebPackPlugin({
         excludeChunks: ['test-bundle'],
         inject: false,
         template: 'src/index.html',
-        filename: 'index.html',
+        // Relative to `output.publicPath`.
+        filename: '../index.html',
         // Extra options.
         title: 'DevStack - Home',
-        isDevelopment: IS_DEVELOPMENT,
+        isDevelopment: IS_DEBUG,
     }),
     // Test suite static file.
     new HtmlWebPackPlugin({
         excludeChunks: ['bundle'],
         inject: false,
         template: 'src/index.html',
-        filename: 'test.html',
-        isDevelopment: IS_DEVELOPMENT,
+        filename: '../test.html',
+        isDevelopment: IS_DEBUG,
         // Extra options.
         title: 'DevStack - Spec Runner',
     }),
@@ -65,13 +47,7 @@ const plugins = [
     }),
 ];
 
-if (IS_DEVELOPMENT) {
-    devtool = '#eval';
-    debug = true;
-}
-
-if (!IS_DEVELOPMENT) {
-    // Optimize for non-development environments.
+if (!IS_DEBUG) {
     plugins.push(new webpack.optimize.DedupePlugin());
     plugins.push(new webpack.optimize.UglifyJsPlugin({
         // UglifyJs produces nonsense warnings by default.
@@ -86,13 +62,13 @@ export default {
         bundle: 'boot.js',
         'test-bundle': 'mocha!./test/boot.js',
     },
-    devtool,
-    debug,
+    devtool: IS_DEBUG ? '#eval' : null,
+    debug: IS_DEBUG,
     output: {
         filename: '[name]-[hash].js',
         chunkFilename: '[name]-[id]-[chunkhash].js',
-        path: path.join(__dirname, 'dist'),
-        publicPath: '/',
+        path: path.join(__dirname, 'dist/static'),
+        publicPath: '/static/',
     },
     module: {
         loaders: [
@@ -107,9 +83,10 @@ export default {
                 query: {
                     // html attributes that should be parsed as module.
                     attributes: ['img:src', 'link:href'],
-                    prependFilenameComment: IS_DEVELOPMENT ? __dirname : null,
-                    // images prepended with '/' are relative to given path.
+                    prependFilenameComment: IS_DEBUG ? __dirname : null,
+                    // Images prepended with '/' are relative to given path.
                     root: path.join(__dirname, 'src'),
+                    parseMacros: false,
                 },
             }, {
                 test: /\.scss$/,
@@ -121,7 +98,7 @@ export default {
                 ),
             }, {
                 // Extract all non-CSS and non-JS assets.
-                test: /\.(gif|png|jpe?g|svg|woff|ttf)$/i,
+                test: /\.(gif|png|jpe?g|svg|ico|woff|ttf)$/i,
                 loader: 'file',
                 query: {
                     name: '[name]-[hash:7].[ext]',
