@@ -25,7 +25,7 @@
         <script src="<%=htmlWebpackPlugin.files.chunks[chunk].entry %>"></script>
         <% } %>
 
-        <% if (htmlWebpackPlugin.options.isDevelopment) { %>
+        <% if (htmlWebpackPlugin.options.isDevServer) { %>
         <script src="/webpack-dev-server.js"></script>
         <% } %>
     </body>

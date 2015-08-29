@@ -6,6 +6,7 @@ import autoprefixer from 'autoprefixer-core';
 import './scripts/load-env';
 
 const IS_DEBUG = !!process.env.CY_DEBUG;
+const IS_DEV_SERVER = process.argv[1].endsWith('webpack-dev-server');
 
 // Plugins that are used for all environments.
 const plugins = [
@@ -30,7 +31,7 @@ const plugins = [
         filename: '../index.html',
         // Extra options.
         title: 'DevStack - Home',
-        isDevelopment: IS_DEBUG,
+        isDevServer: IS_DEV_SERVER,
     }),
     // Test suite static file.
     new HtmlWebPackPlugin({
@@ -38,11 +39,11 @@ const plugins = [
         inject: false,
         template: 'src/index.html',
         filename: '../test.html',
-        isDevelopment: IS_DEBUG,
         // Extra options.
         title: 'DevStack - Spec Runner',
+        isDevServer: IS_DEV_SERVER,
     }),
-    new ExtractTextPlugin('[name]-[contenthash].css', {
+    new ExtractTextPlugin('[name]-[contenthash:7].css', {
         allChunks: true,
     }),
 ];
@@ -65,10 +66,10 @@ export default {
     devtool: IS_DEBUG ? '#eval' : null,
     debug: IS_DEBUG,
     output: {
-        filename: '[name]-[hash].js',
-        chunkFilename: '[name]-[id]-[chunkhash].js',
+        filename: '[name]-[hash:7].js',
+        chunkFilename: '[name]-[id]-[chunkhash:7].js',
         path: path.join(__dirname, 'dist/static'),
-        publicPath: '/static/',
+        publicPath: 'static/',
     },
     module: {
         loaders: [
@@ -94,7 +95,9 @@ export default {
                 loader: ExtractTextPlugin.extract(
                     'css?sourceMap!' +
                     'postcss!' +
-                    'sass?sourceMap&outputStyle=compressed'
+                    'sass?sourceMap&outputStyle=compressed',
+                    // Paths in CSS are relative to dist/static/ instead of dist/
+                    {publicPath: ''}
                 ),
             }, {
                 // Extract all non-CSS and non-JS assets.
