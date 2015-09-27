@@ -8,7 +8,6 @@ import './scripts/load-env';
 const IS_DEBUG = !!process.env.CY_DEBUG;
 const IS_DEV_SERVER = process.argv[1].endsWith('webpack-dev-server');
 
-// Plugins that are used for all environments.
 const plugins = [
     new webpack.ProvidePlugin({
         $: 'jquery',
