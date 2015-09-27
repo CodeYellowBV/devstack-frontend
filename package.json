@@ -34,19 +34,21 @@
     "chai": "3.3.0",
     "sinon": "git://github.com/uberVU/Sinon.JS.git#0aaf834c9f8ee302874a60b1aff69090896faf5c",
     "mocha-loader": "0.7.1",
-    "run-headless-chromium": "0.0.12",
     "autoprefixer-core": "6.0.1",
     "webpack": "1.12.2",
     "webpack-dev-server": "1.12.0",
-    "eslint": "1.5.1"
+    "eslint": "1.5.1",
+    "jsdom": "6.5.1",
+    "jsdom-test": "git://github.com/CodeYellowBV/jsdom-test.git#v0.1.0",
+    "loca": "1.0.1"
   },
   "engines": {
-    "node": ">=0.12.5",
+    "node": ">=4.0.0",
     "npm": ">= 2.11.0"
   },
   "scripts": {
     "pretest": "npm run -s build-js",
-    "test": "npm run -s lint && run-headless-chromium test/index.html --disable-setuid-sandbox",
+    "test": "npm run -s lint && jsdom-test dist/test.html",
     "lint": "eslint .",
     "build": "npm run -s lint && npm run -s clean && npm run -s build-js",
     "build-js": "webpack --colors --progress --bail",
