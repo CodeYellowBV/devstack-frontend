@@ -51,7 +51,7 @@ if (!IS_DEBUG) {
     plugins.push(new webpack.optimize.DedupePlugin());
     plugins.push(new webpack.optimize.UglifyJsPlugin({
         // UglifyJs produces nonsense warnings by default.
-        compress: {warnings: false},
+        compress: { warnings: false },
     }));
     plugins.push(new webpack.optimize.OccurenceOrderPlugin());
 }
@@ -96,7 +96,7 @@ export default {
                     'postcss!' +
                     'sass?sourceMap&outputStyle=compressed',
                     // Paths in CSS are relative to dist/static/ instead of dist/
-                    {publicPath: ''}
+                    { publicPath: '' }
                 ),
             }, {
                 // Extract all non-CSS and non-JS assets.
@@ -124,7 +124,7 @@ export default {
     },
     postcss() {
         return [
-            autoprefixer({browsers: ['last 1 versions']}),
+            autoprefixer({ browsers: ['last 1 versions'] }),
         ];
     },
 };
