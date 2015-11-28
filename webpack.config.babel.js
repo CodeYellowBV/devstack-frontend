@@ -2,7 +2,7 @@ import path from 'path';
 import webpack from 'webpack';
 import HtmlWebPackPlugin from 'html-webpack-plugin';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
-import autoprefixer from 'autoprefixer-core';
+import autoprefixer from 'autoprefixer';
 import './scripts/load-env';
 
 const IS_DEBUG = !!process.env.CY_DEBUG;
@@ -74,8 +74,8 @@ export default {
         loaders: [
             {
                 test: /\.js$/,
-                exclude: /(node_modules)/,
-                loader: 'babel?stage=0',
+                exclude: /node_modules/,
+                loader: 'babel',
             }, {
                 // Precompile html templates with lodash.
                 test: /\.html$/,
@@ -118,6 +118,7 @@ export default {
         alias: {
             'jquery': require.resolve('jquery'),
             'marionette': 'backbone.marionette',
+            'crux-base-model': 'backbone-relation',
             'underscore': 'lodash',
             'crux': 'backbone-crux/src',
         },
@@ -126,5 +127,8 @@ export default {
         return [
             autoprefixer({ browsers: ['last 1 versions'] }),
         ];
+    },
+    devServer: {
+        stats: 'errors-only',
     },
 };
